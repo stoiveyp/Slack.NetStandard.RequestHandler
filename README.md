@@ -24,7 +24,7 @@ public class EchoCommand:SlashCommandHandler<Message>
 {
     public WeatherCommand():base("/echo")
 
-    public Task<SkillResponse> Handle(SlackContext context){
+    public Task<Message> Handle(SlackContext context){
         var restOfMessage = context.Command.Text;
         return new Message{Text = restOfMessage };
     }
