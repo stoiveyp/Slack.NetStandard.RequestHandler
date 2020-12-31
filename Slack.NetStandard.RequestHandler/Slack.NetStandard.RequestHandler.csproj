@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Authors>Steven Pears</Authors>
+    <Description>Small library to help build slack apps in a more modular way</Description>
+    <PackageProjectUrl>https://github.com/stoiveyp/Slack.NetStandard.RequestHandler</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/stoiveyp/Slack.NetStandard.RequestHandler</RepositoryUrl>
+    <PackageTags>slack</PackageTags>
+    <PackageReleaseNotes>Initial release</PackageReleaseNotes>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Slack.NetStandard.Endpoint" Version="1.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>
