@@ -8,10 +8,10 @@
     <PackageProjectUrl>https://github.com/stoiveyp/Slack.NetStandard.RequestHandler</PackageProjectUrl>
     <RepositoryUrl>https://github.com/stoiveyp/Slack.NetStandard.RequestHandler</RepositoryUrl>
     <PackageTags>slack</PackageTags>
-    <PackageReleaseNotes>Refactor command, event and interaction handlers to abstract necessary casting</PackageReleaseNotes>
+    <PackageReleaseNotes>Add pipeline constructor to allow requesthandler as param array</PackageReleaseNotes>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.0.0</Version>
+    <Version>2.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

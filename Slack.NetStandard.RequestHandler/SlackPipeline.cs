@@ -25,6 +25,8 @@ namespace Slack.NetStandard.RequestHandler
             ErrorInterceptors = new LinkedList<ISlackErrorInterceptor<TResponse>>();
         }
 
+        public SlackPipeline(params ISlackRequestHandler<TResponse>[] requestHandlers):this(requestHandlers, null, null, null) { }
+
         public SlackPipeline(IEnumerable<ISlackRequestHandler<TResponse>> requestHandlers) : this(requestHandlers, null, null, null)
         {
         }
