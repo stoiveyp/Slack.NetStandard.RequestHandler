@@ -7,20 +7,28 @@ using Slack.NetStandard.Objects;
 
 namespace Slack.NetStandard.RequestHandler.Handlers
 {
-    public abstract class Modal: ISlackRequestHandler<ResponseAction>
+    public abstract class Modal
     {
-        protected Modal(string callbackId, params string[] actionIds)
+        protected Modal(string callbackId):this(callbackId, bp => false){}
+
+        protected Modal(string callbackId, params string[] updateActionIds):this(callbackId, bp => IsBlockAction(bp, updateActionIds))
         {
-            CallbackId = callbackId;
-            ActionIds = new List<string>(actionIds);
+            
         }
 
+        protected Modal(string callbackId, Func<SlackContext, bool> updateCheck)
+        {
+            CallbackId = callbackId;
+            UpdateCheck = updateCheck;
+        }
+
+        public Func<SlackContext, bool> UpdateCheck { get; set; }
+
         internal readonly string ModalId = Guid.NewGuid().ToString("N");
-        public List<Modal> Modals = new ();
-        public List<string> ActionIds { get; }
+        public Dictionary<string,Modal> Modals = new ();
 
         public string CallbackId { get; set; }
-        public bool CanHandle(SlackContext context)
+        public virtual bool CanHandle(SlackContext context)
         {
             if (IsViewSubmission(context))
             {
@@ -29,13 +37,13 @@ namespace Slack.NetStandard.RequestHandler.Handlers
 
             }
 
-            if (IsBlockAction(context))
+            if (UpdateCheck(context))
             {
-                context.Items[ModalId] = "blocks";
+                context.Items[ModalId] = "update";
                 return true;
             }
 
-            return Modals.Any(m => m.CanHandle(context));
+            return Modals.Any(m => m.Value.CanHandle(context));
         }
 
         protected virtual bool IsViewSubmission(SlackContext context)
@@ -43,30 +51,34 @@ namespace Slack.NetStandard.RequestHandler.Handlers
             return context.Interaction is ViewSubmissionPayload view && view.View.CallbackId == CallbackId;
         }
 
-        protected virtual bool IsBlockAction(SlackContext context)
+        protected static bool IsBlockAction(SlackContext context, string[] actionIds)
         {
-            return ActionIds.Any() && context.Interaction is BlockActionsPayload blocks &&
-                   blocks.Actions.Any(pa => ActionIds.Contains(pa.ActionId));
+            return actionIds.Any() && context.Interaction is BlockActionsPayload blocks &&
+                   blocks.Actions.Any(pa => actionIds.Contains(pa.ActionId));
         }
 
-        public virtual Task<ResponseAction> SubmitView(ViewSubmissionPayload payload, SlackContext context)
+        public virtual Task<ResponseAction> Submit(ViewSubmissionPayload payload, SlackContext context)
         {
             return Task.FromResult(default(ResponseAction));
         }
 
-        public virtual Task<ResponseAction> UpdateView(BlockActionsPayload blockActions, SlackContext context)
+        public virtual Task<ResponseAction> Update(BlockActionsPayload blockActions, SlackContext context)
         {
             return Task.FromResult(default(ResponseAction));
         }
+
+        protected abstract View InitialView(object context = null);
 
         public Task<ResponseAction> Handle(SlackContext context)
         {
             if (!context.Items.ContainsKey(ModalId))
             {
-                return Modals.First(m => context.Items.ContainsKey(m.ModalId)).Handle(context);
+                return Modals.First(m => context.Items.ContainsKey(m.Value.ModalId)).Value.Handle(context);
             }
 
-            return context.Items[ModalId] == "view" ? SubmitView((ViewSubmissionPayload)context.Interaction, context) : UpdateView((BlockActionsPayload) context.Interaction, context);
+            return (string)context.Items[ModalId] == "view" ? 
+                Submit((ViewSubmissionPayload)context.Interaction, context) : 
+                Update((BlockActionsPayload) context.Interaction, context);
         }
     }
 }
