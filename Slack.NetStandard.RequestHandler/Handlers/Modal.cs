@@ -7,7 +7,7 @@ using Slack.NetStandard.Objects;
 
 namespace Slack.NetStandard.RequestHandler.Handlers
 {
-    public abstract class Modal
+    public abstract class Modal: IParentModal
     {
         protected Modal(string callbackId):this(callbackId, bp => false){}
 
@@ -24,7 +24,7 @@ namespace Slack.NetStandard.RequestHandler.Handlers
 
         public Func<SlackContext, bool> UpdateCheck { get; set; }
 
-        internal readonly string ModalId = Guid.NewGuid().ToString("N");
+        public readonly string ModalHandlerId = Guid.NewGuid().ToString("N");
         public Dictionary<string,Modal> Modals = new ();
 
         public string CallbackId { get; set; }
@@ -32,14 +32,14 @@ namespace Slack.NetStandard.RequestHandler.Handlers
         {
             if (IsViewSubmission(context))
             {
-                context.Items[ModalId] = "view";
+                context.Items[ModalHandlerId] = "submit";
                 return true;
 
             }
 
             if (UpdateCheck(context))
             {
-                context.Items[ModalId] = "update";
+                context.Items[ModalHandlerId] = "update";
                 return true;
             }
 
@@ -57,26 +57,38 @@ namespace Slack.NetStandard.RequestHandler.Handlers
                    blocks.Actions.Any(pa => actionIds.Contains(pa.ActionId));
         }
 
-        public virtual Task<ResponseAction> Submit(ViewSubmissionPayload payload, SlackContext context)
+        public virtual Task<ResponseAction> Submit(ViewSubmissionPayload payload, SlackContext context, IParentModal parent = null)
         {
             return Task.FromResult(default(ResponseAction));
         }
 
-        public virtual Task<ResponseAction> Update(BlockActionsPayload blockActions, SlackContext context)
+        public virtual Task<ResponseAction> Update(BlockActionsPayload blockActions, SlackContext context, IParentModal parent = null)
         {
             return Task.FromResult(default(ResponseAction));
         }
 
-        protected abstract View InitialView(object context = null);
+        public abstract View GenerateView(object context = null);
 
-        public Task<ResponseAction> Handle(SlackContext context)
+        protected virtual Task<ResponseAction> HandleFromParent(SlackContext context, IParentModal parent)
         {
-            if (!context.Items.ContainsKey(ModalId))
+            if (!context.Items.ContainsKey(ModalHandlerId))
             {
-                return Modals.First(m => context.Items.ContainsKey(m.Value.ModalId)).Value.Handle(context);
+                return Modals.First(m => context.Items.ContainsKey(m.Value.ModalHandlerId)).Value.HandleFromParent(context, this);
             }
 
-            return (string)context.Items[ModalId] == "view" ? 
+            return (string)context.Items[ModalHandlerId] == "submit" ?
+                Submit((ViewSubmissionPayload)context.Interaction, context, parent) :
+                Update((BlockActionsPayload)context.Interaction, context, parent);
+        }
+
+        public virtual Task<ResponseAction> Handle(SlackContext context)
+        {
+            if (!context.Items.ContainsKey(ModalHandlerId))
+            {
+                return Modals.First(m => context.Items.ContainsKey(m.Value.ModalHandlerId)).Value.HandleFromParent(context, this);
+            }
+
+            return (string)context.Items[ModalHandlerId] == "submit" ? 
                 Submit((ViewSubmissionPayload)context.Interaction, context) : 
                 Update((BlockActionsPayload) context.Interaction, context);
         }
