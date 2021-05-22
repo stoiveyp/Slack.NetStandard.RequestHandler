@@ -39,7 +39,7 @@ namespace Slack.NetStandard.RequestHandler.Tests
             var context = new SlackContext(new SlackInformation(new ViewSubmissionPayload
                 { View = new View { CallbackId = "subCallback" } }));
             Assert.False(modal.CanHandle(context));
-            modal.Modals.Add("secondScreen",subModal);
+            modal.Modals.Add(subModal);
             Assert.True(modal.CanHandle(context));
         }
 
@@ -97,7 +97,7 @@ namespace Slack.NetStandard.RequestHandler.Tests
             modal.Configure().Submit(Arg.Any<ViewSubmissionPayload>(), Arg.Any<SlackContext>(), Arg.Any<Modal>())
                 .Returns(new ResponseActionClear());
             var parentModal = Substitute.ForPartsOf<Modal>("parentCallback");
-            parentModal.Modals.Add("secondary", modal);
+            parentModal.Modals.Add(modal);
 
             var context = new SlackContext(new SlackInformation(new ViewSubmissionPayload()));
             context.Items.Add(modal.ModalHandlerId, "submit");

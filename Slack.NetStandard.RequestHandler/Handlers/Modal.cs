@@ -25,7 +25,7 @@ namespace Slack.NetStandard.RequestHandler.Handlers
         public Func<SlackContext, bool> UpdateCheck { get; set; }
 
         public readonly string ModalHandlerId = Guid.NewGuid().ToString("N");
-        public Dictionary<string, Modal> Modals = new();
+        public List<Modal> Modals = new();
 
         public string CallbackId { get; set; }
         public virtual bool CanHandle(SlackContext context)
@@ -43,7 +43,7 @@ namespace Slack.NetStandard.RequestHandler.Handlers
                 return true;
             }
 
-            return Modals.Any(m => m.Value.CanHandle(context));
+            return Modals.Any(m => m.CanHandle(context));
         }
 
         protected virtual bool IsViewSubmission(SlackContext context)
@@ -83,7 +83,7 @@ namespace Slack.NetStandard.RequestHandler.Handlers
         {
             if (!context.Items.ContainsKey(ModalHandlerId))
             {
-                return Modals.First(m => context.Items.ContainsKey(m.Value.ModalHandlerId)).Value.HandleFromParent(context, this);
+                return Modals.First(m => context.Items.ContainsKey(m.ModalHandlerId)).HandleFromParent(context, this);
             }
 
             return (string)context.Items[ModalHandlerId] == "submit" ?
@@ -95,7 +95,7 @@ namespace Slack.NetStandard.RequestHandler.Handlers
         {
             if (!context.Items.ContainsKey(ModalHandlerId))
             {
-                return Modals.First(m => context.Items.ContainsKey(m.Value.ModalHandlerId)).Value.HandleFromParent(context, this);
+                return Modals.First(m => context.Items.ContainsKey(m.ModalHandlerId)).HandleFromParent(context, this);
             }
 
             return (string)context.Items[ModalHandlerId] == "submit" ?
