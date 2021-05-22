@@ -1,9 +1,10 @@
-﻿using Slack.NetStandard.Objects;
+﻿using System.Threading.Tasks;
+using Slack.NetStandard.Objects;
 
 namespace Slack.NetStandard.RequestHandler.Handlers
 {
     public interface IParentModal
     {
-        View GenerateView(object context = null);
+        Task<View> GenerateView(object context = null);
     }
 }
