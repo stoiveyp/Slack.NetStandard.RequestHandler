@@ -86,7 +86,7 @@ namespace Slack.NetStandard.RequestHandler.Tests
             context.Items.Add(modal.ModalHandlerId, "update");
             var response = await modal.Handle(context);
 
-            Assert.IsType<ResponseActionClear>(response);
+            Assert.Null(response);
             await modal.Received(1).Update(Arg.Any<BlockActionsPayload>(), Arg.Any<SlackContext>());
         }
 
