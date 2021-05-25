@@ -64,43 +64,53 @@ namespace Slack.NetStandard.RequestHandler.Handlers
 
         protected abstract Task<ISlackApiClient> GetClient(string teamId);
 
-        public virtual async Task<ResponseAction> Update(BlockActionsPayload blockActions, SlackContext context, IParentModal parent = null)
+        public virtual async Task Update(BlockActionsPayload blockActions, SlackContext context,
+            IParentModal parent = null)
         {
             var view = await GenerateView(context);
+            var client = await GetClient(blockActions.Team.ID);
 
             if (parent == null)
             {
-                var client = await GetClient(blockActions.Team.ID);
                 await client.View.Open(blockActions.TriggerId, view);
             }
-
-            return new ResponseActionPush(view);
+            else
+            {
+                await client.View.Push(blockActions.TriggerId, view);
+            }
         }
 
         public abstract Task<View> GenerateView(object context = null);
 
-        protected virtual Task<ResponseAction> HandleFromParent(SlackContext context, IParentModal parent)
+        protected virtual async Task<ResponseAction> HandleFromParent(SlackContext context, IParentModal parent)
         {
             if (!context.Items.ContainsKey(ModalHandlerId))
             {
-                return Modals.First(m => context.Items.ContainsKey(m.ModalHandlerId)).HandleFromParent(context, this);
+                return await Modals.First(m => context.Items.ContainsKey(m.ModalHandlerId)).HandleFromParent(context, this);
             }
 
-            return (string)context.Items[ModalHandlerId] == "submit" ?
-                Submit((ViewSubmissionPayload)context.Interaction, context, parent) :
-                Update((BlockActionsPayload)context.Interaction, context, parent);
+            if ((string) context.Items[ModalHandlerId] == "submit")
+            {
+                return await Submit((ViewSubmissionPayload) context.Interaction, context, parent);
+            }
+
+            await Update((BlockActionsPayload)context.Interaction, context, parent);
+            return null;
         }
 
-        public virtual Task<ResponseAction> Handle(SlackContext context)
+        public virtual async Task<ResponseAction> Handle(SlackContext context)
         {
             if (!context.Items.ContainsKey(ModalHandlerId))
             {
-                return Modals.First(m => context.Items.ContainsKey(m.ModalHandlerId)).HandleFromParent(context, this);
+                return await Modals.First(m => context.Items.ContainsKey(m.ModalHandlerId)).HandleFromParent(context, this);
             }
 
-            return (string)context.Items[ModalHandlerId] == "submit" ?
-                Submit((ViewSubmissionPayload)context.Interaction, context) :
-                Update((BlockActionsPayload)context.Interaction, context);
+            if ((string) context.Items[ModalHandlerId] == "submit")
+            {
+                return await Submit((ViewSubmissionPayload) context.Interaction, context);
+            }
+            await Update((BlockActionsPayload)context.Interaction, context);
+            return null;
         }
     }
 }

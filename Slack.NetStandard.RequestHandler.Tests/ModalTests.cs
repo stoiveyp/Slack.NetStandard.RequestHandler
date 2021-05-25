@@ -80,7 +80,7 @@ namespace Slack.NetStandard.RequestHandler.Tests
         {
             var modal = Substitute.ForPartsOf<Modal>("testCallback");
             modal.Configure().Update(Arg.Any<BlockActionsPayload>(), Arg.Any<SlackContext>())
-                .Returns(new ResponseActionClear());
+                .Returns(Task.FromResult((ResponseAction)null));
             var context = new SlackContext(new SlackInformation(new BlockActionsPayload()));
 
             context.Items.Add(modal.ModalHandlerId, "update");
