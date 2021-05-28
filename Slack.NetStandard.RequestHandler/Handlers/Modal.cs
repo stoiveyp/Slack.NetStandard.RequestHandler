@@ -43,7 +43,13 @@ namespace Slack.NetStandard.RequestHandler.Handlers
                 return true;
             }
 
-            return Modals.Any(m => m.CanHandle(context));
+            var subAccepts = Modals.Any(m => m.CanHandle(context));
+            if (subAccepts)
+            {
+                context.Items[nameof(ModalHandlerId)] ??= new List<string>();
+                ((List<string>) context.Items[nameof(ModalHandlerId)]).Add(ModalHandlerId);
+            }
+            return subAccepts
         }
 
         protected virtual bool IsViewSubmission(SlackContext context)
@@ -86,7 +92,7 @@ namespace Slack.NetStandard.RequestHandler.Handlers
         {
             if (!context.Items.ContainsKey(ModalHandlerId))
             {
-                return await FindModal(context.Items).First().HandleFromParent(context, this);
+                return await ExecuteModal(context, this);
             }
 
             if ((string) context.Items[ModalHandlerId] == "submit")
@@ -98,24 +104,17 @@ namespace Slack.NetStandard.RequestHandler.Handlers
             return null;
         }
 
-        IEnumerable<Modal> FindModal(Dictionary<string,object> items)
+        internal Task<ResponseAction> ExecuteModal(SlackContext context, IParentModal parent)
         {
-            if (items.ContainsKey(ModalHandlerId))
-            {
-                yield return this;
-            }
-
-            foreach (var subModal in Modals.SelectMany(m => m.FindModal(items)))
-            {
-                yield return subModal;
-            }
+            var modalList = ((List<string>)context.Items[nameof(ModalHandlerId)]);
+            return Modals.First(m => modalList.Contains(m.ModalHandlerId)).HandleFromParent(context, parent);
         }
 
         public virtual async Task<ResponseAction> Handle(SlackContext context)
         {
             if (!context.Items.ContainsKey(ModalHandlerId))
             {
-                return await FindModal(context.Items).First().HandleFromParent(context, this);
+                return await ExecuteModal(context, this);
             }
 
             if ((string) context.Items[ModalHandlerId] == "submit")
