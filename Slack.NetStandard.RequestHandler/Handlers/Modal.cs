@@ -86,7 +86,7 @@ namespace Slack.NetStandard.RequestHandler.Handlers
         {
             if (!context.Items.ContainsKey(ModalHandlerId))
             {
-                return await Modals.First(m => context.Items.ContainsKey(m.ModalHandlerId)).HandleFromParent(context, this);
+                return await FindModal(context.Items).First().HandleFromParent(context, this);
             }
 
             if ((string) context.Items[ModalHandlerId] == "submit")
@@ -98,11 +98,24 @@ namespace Slack.NetStandard.RequestHandler.Handlers
             return null;
         }
 
+        IEnumerable<Modal> FindModal(Dictionary<string,object> items)
+        {
+            if (items.ContainsKey(ModalHandlerId))
+            {
+                yield return this;
+            }
+
+            foreach (var subModal in Modals.SelectMany(m => m.FindModal(items)))
+            {
+                yield return subModal;
+            }
+        }
+
         public virtual async Task<ResponseAction> Handle(SlackContext context)
         {
             if (!context.Items.ContainsKey(ModalHandlerId))
             {
-                return await Modals.First(m => context.Items.ContainsKey(m.ModalHandlerId)).HandleFromParent(context, this);
+                return await FindModal(context.Items).First().HandleFromParent(context, this);
             }
 
             if ((string) context.Items[ModalHandlerId] == "submit")
