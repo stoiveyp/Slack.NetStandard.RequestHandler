@@ -46,10 +46,15 @@ namespace Slack.NetStandard.RequestHandler.Handlers
             var subAccepts = Modals.Any(m => m.CanHandle(context));
             if (subAccepts)
             {
-                context.Items[nameof(ModalHandlerId)] ??= new List<string>();
+                if (!context.Items.ContainsKey(nameof(ModalHandlerId)))
+                {
+                    context.Items.Add(nameof(ModalHandlerId), new List<string>());
+                }
+                
                 ((List<string>) context.Items[nameof(ModalHandlerId)]).Add(ModalHandlerId);
             }
-            return subAccepts
+
+            return subAccepts;
         }
 
         protected virtual bool IsViewSubmission(SlackContext context)
