@@ -6,6 +6,7 @@ using Slack.NetStandard.Endpoint;
 using Slack.NetStandard.Interaction;
 using Slack.NetStandard.Objects;
 using Slack.NetStandard.RequestHandler.Handlers;
+using Slack.NetStandard.WebApi;
 using Xunit;
 
 namespace Slack.NetStandard.RequestHandler.Tests
@@ -71,7 +72,8 @@ namespace Slack.NetStandard.RequestHandler.Tests
             context.Items.Add(modal.ModalHandlerId, "submit");
             var response = await modal.Handle(context);
 
-            Assert.IsType<ResponseActionClear>(response);
+            Assert.IsType<ResponseActionClear>(response.Submit);
+            Assert.Null(response.Update);
             await modal.Received(1).Submit(Arg.Any<ViewSubmissionPayload>(), Arg.Any<SlackContext>());
         }
 
@@ -80,13 +82,14 @@ namespace Slack.NetStandard.RequestHandler.Tests
         {
             var modal = Substitute.ForPartsOf<Modal>("testCallback");
             modal.Configure().Update(Arg.Any<BlockActionsPayload>(), Arg.Any<SlackContext>())
-                .Returns(Task.FromResult((ResponseAction)null));
+                .Returns(Task.FromResult(new WebApiResponse()));
             var context = new SlackContext(new SlackInformation(new BlockActionsPayload()));
 
             context.Items.Add(modal.ModalHandlerId, "update");
             var response = await modal.Handle(context);
 
-            Assert.Null(response);
+            Assert.Null(response.Submit);
+            Assert.NotNull(response.Update);
             await modal.Received(1).Update(Arg.Any<BlockActionsPayload>(), Arg.Any<SlackContext>());
         }
 
@@ -104,7 +107,8 @@ namespace Slack.NetStandard.RequestHandler.Tests
 
             var response = await modal.Handle(context);
 
-            Assert.IsType<ResponseActionClear>(response);
+            Assert.IsType<ResponseActionClear>(response.Submit);
+            Assert.Null(response.Update);
             await modal.Received(1).Submit(Arg.Any<ViewSubmissionPayload>(), Arg.Any<SlackContext>(),Arg.Any<Modal>());
         }
     }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Slack.NetStandard.Interaction;
 using Slack.NetStandard.Objects;
+using Slack.NetStandard.WebApi;
 
 namespace Slack.NetStandard.RequestHandler.Handlers
 {
@@ -75,7 +76,7 @@ namespace Slack.NetStandard.RequestHandler.Handlers
 
         protected abstract Task<ISlackApiClient> GetClient(string teamId);
 
-        public virtual async Task Update(BlockActionsPayload blockActions, SlackContext context,
+        public virtual async Task<WebApiResponse> Update(BlockActionsPayload blockActions, SlackContext context,
             IParentModal parent = null)
         {
             var view = await GenerateView(context);
@@ -83,17 +84,15 @@ namespace Slack.NetStandard.RequestHandler.Handlers
 
             if (parent == null)
             {
-                await client.View.Open(blockActions.TriggerId, view);
+                return await client.View.Open(blockActions.TriggerId, view);
             }
-            else
-            {
-                await client.View.Push(blockActions.TriggerId, view);
-            }
+
+            return await client.View.Push(blockActions.TriggerId, view);
         }
 
         public abstract Task<View> GenerateView(object context = null);
 
-        protected virtual async Task<ResponseAction> HandleFromParent(SlackContext context, IParentModal parent)
+        protected virtual async Task<(ResponseAction Submit, WebApiResponse Update)> HandleFromParent(SlackContext context, IParentModal parent)
         {
             if (!context.Items.ContainsKey(ModalHandlerId))
             {
@@ -102,32 +101,34 @@ namespace Slack.NetStandard.RequestHandler.Handlers
 
             if ((string) context.Items[ModalHandlerId] == "submit")
             {
-                return await Submit((ViewSubmissionPayload) context.Interaction, context, parent);
+                var submit = await Submit((ViewSubmissionPayload) context.Interaction, context, parent);
+                return (submit, null);
             }
 
-            await Update((BlockActionsPayload)context.Interaction, context, parent);
-            return null;
+            var response = await Update((BlockActionsPayload)context.Interaction, context, parent);
+            return (null, response);
         }
 
-        internal Task<ResponseAction> ExecuteModal(SlackContext context, IParentModal parent)
+        internal Task<(ResponseAction Submit, WebApiResponse Update)> ExecuteModal(SlackContext context, IParentModal parent)
         {
             var modalList = ((List<string>)context.Items[nameof(ModalHandlerId)]);
             return Modals.First(m => context.Items.ContainsKey(m.ModalHandlerId) || modalList.Contains(m.ModalHandlerId)).HandleFromParent(context, parent);
         }
 
-        public virtual async Task<ResponseAction> Handle(SlackContext context)
+        public virtual async Task<(ResponseAction Submit, WebApiResponse Update)> Handle(SlackContext context)
         {
             if (!context.Items.ContainsKey(ModalHandlerId))
             {
-                return await ExecuteModal(context, this);
+                var submit = await ExecuteModal(context, this);
             }
 
             if ((string) context.Items[ModalHandlerId] == "submit")
             {
-                return await Submit((ViewSubmissionPayload) context.Interaction, context);
+                var submit = await Submit((ViewSubmissionPayload) context.Interaction, context);
+                return (submit, null);
             }
-            await Update((BlockActionsPayload)context.Interaction, context);
-            return null;
+            var response = await Update((BlockActionsPayload)context.Interaction, context);
+            return (null, response);
         }
     }
 }

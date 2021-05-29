@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Slack.NetStandard.Interaction;
+using Slack.NetStandard.WebApi;
 
 namespace Slack.NetStandard.RequestHandler.Handlers
 {
@@ -13,9 +14,7 @@ namespace Slack.NetStandard.RequestHandler.Handlers
 
         public Modal InitialView { get; set; }
 
-        public abstract Task<TResponse> ConvertResponseAction(ResponseAction responseAction);
-
-        public abstract Task<TResponse> NoResponse();
+        public abstract Task<TResponse> ConvertResponseAction((ResponseAction Submit, WebApiResponse Update) responseAction);
 
         public bool CanHandle(SlackContext context)
         {
@@ -25,13 +24,8 @@ namespace Slack.NetStandard.RequestHandler.Handlers
         public async Task<TResponse> Handle(SlackContext context)
         {
             var task = InitialView.Handle(context);
-            if (task == null)
-            {
-                return await NoResponse();
-            }
-
             var result = await task;
-            return await (result != null ? ConvertResponseAction(result) : NoResponse());
+            return await ConvertResponseAction(result);
         }
     }
 }
