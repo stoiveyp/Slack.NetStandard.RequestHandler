@@ -11,7 +11,7 @@
     <PackageReleaseNotes>Handle modal view updating itself</PackageReleaseNotes>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.2.0-beta9</Version>
+    <Version>2.2.0-beta10</Version>
   </PropertyGroup>
 
   <ItemGroup>

@@ -125,7 +125,7 @@ namespace Slack.NetStandard.RequestHandler.Handlers
         {
             if (!context.Items.ContainsKey(ModalHandlerId))
             {
-                var submit = await ExecuteModal(context, this);
+                return await ExecuteModal(context, this);
             }
 
             if ((string) context.Items[ModalHandlerId] == "submit")
