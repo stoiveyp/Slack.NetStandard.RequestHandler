@@ -8,7 +8,7 @@
     <PackageProjectUrl>https://github.com/stoiveyp/Slack.NetStandard.RequestHandler</PackageProjectUrl>
     <RepositoryUrl>https://github.com/stoiveyp/Slack.NetStandard.RequestHandler</RepositoryUrl>
     <PackageTags>slack</PackageTags>
-    <PackageReleaseNotes>Correct sub modal selection logic</PackageReleaseNotes>
+    <PackageReleaseNotes>Update modal and modalStack return values</PackageReleaseNotes>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Version>2.2.0-beta8</Version>
