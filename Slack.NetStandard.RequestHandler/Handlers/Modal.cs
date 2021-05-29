@@ -82,10 +82,16 @@ namespace Slack.NetStandard.RequestHandler.Handlers
             var view = await GenerateView(context);
             var client = await GetClient(blockActions.Team.ID);
 
+            if (blockActions.View?.CallbackId == CallbackId)
+            {
+                return await client.View.UpdateByViewId(blockActions.View.ID, view);
+            }
+
             if (parent == null)
             {
                 return await client.View.Open(blockActions.TriggerId, view);
             }
+
 
             return await client.View.Push(blockActions.TriggerId, view);
         }

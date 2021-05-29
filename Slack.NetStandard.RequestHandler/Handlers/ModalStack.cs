@@ -14,7 +14,7 @@ namespace Slack.NetStandard.RequestHandler.Handlers
 
         public Modal InitialView { get; set; }
 
-        public abstract Task<TResponse> ConvertResponseAction((ResponseAction Submit, WebApiResponse Update) responseAction);
+        public abstract Task<TResponse> ConvertResponseAction((ResponseAction Submit, WebApiResponse Update) responses);
 
         public bool CanHandle(SlackContext context)
         {

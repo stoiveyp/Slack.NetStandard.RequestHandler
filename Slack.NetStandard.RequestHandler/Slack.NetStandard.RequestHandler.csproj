@@ -8,10 +8,10 @@
     <PackageProjectUrl>https://github.com/stoiveyp/Slack.NetStandard.RequestHandler</PackageProjectUrl>
     <RepositoryUrl>https://github.com/stoiveyp/Slack.NetStandard.RequestHandler</RepositoryUrl>
     <PackageTags>slack</PackageTags>
-    <PackageReleaseNotes>Update modal and modalStack return values</PackageReleaseNotes>
+    <PackageReleaseNotes>Handle modal view updating itself</PackageReleaseNotes>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.2.0-beta8</Version>
+    <Version>2.2.0-beta9</Version>
   </PropertyGroup>
 
   <ItemGroup>
