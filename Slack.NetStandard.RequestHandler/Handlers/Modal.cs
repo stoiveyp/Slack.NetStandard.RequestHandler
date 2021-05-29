@@ -112,7 +112,7 @@ namespace Slack.NetStandard.RequestHandler.Handlers
         internal Task<ResponseAction> ExecuteModal(SlackContext context, IParentModal parent)
         {
             var modalList = ((List<string>)context.Items[nameof(ModalHandlerId)]);
-            return Modals.First(m => modalList.Contains(m.ModalHandlerId)).HandleFromParent(context, parent);
+            return Modals.First(m => context.Items.ContainsKey(m.ModalHandlerId) || modalList.Contains(m.ModalHandlerId)).HandleFromParent(context, parent);
         }
 
         public virtual async Task<ResponseAction> Handle(SlackContext context)

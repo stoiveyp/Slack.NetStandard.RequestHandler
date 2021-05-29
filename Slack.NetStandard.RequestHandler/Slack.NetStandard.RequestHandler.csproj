@@ -8,10 +8,10 @@
     <PackageProjectUrl>https://github.com/stoiveyp/Slack.NetStandard.RequestHandler</PackageProjectUrl>
     <RepositoryUrl>https://github.com/stoiveyp/Slack.NetStandard.RequestHandler</RepositoryUrl>
     <PackageTags>slack</PackageTags>
-    <PackageReleaseNotes>Fix third level of modals</PackageReleaseNotes>
+    <PackageReleaseNotes>Correct sub modal selection logic</PackageReleaseNotes>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.2.0-beta6</Version>
+    <Version>2.2.0-beta7</Version>
   </PropertyGroup>
 
   <ItemGroup>
