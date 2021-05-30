@@ -69,3 +69,64 @@ Although you can create handlers for yourself if you wish, there are several typ
 *    EventHandler - looks for a specific type of event from the Events API
 *    EventCallbackHandler - handles specific types of event callback (most events are of this type except UrlVerification and AppRateLimited)
 *    AlwaysTrueRequestHandler - Good as a final item in the list, a catch all that always returns true to ensure you never have requests fail without some handled response
+
+# Creating Modal Stacks
+To help manage a stack of modal views, you can create ModalStack handlers within your application. These maintain modal view hierarchies.
+
+__Modal Stacks__
+
+To create a modal stack you start by creating a class that will handle all your modal views. 
+
+This must inherit from ModalStack<T> and helps translate to your end result
+
+```csharp
+public class GatewayResponseStack : ModalStack<APIGatewayProxyResponse>
+    {
+        public GatewayResponseStack(Modal initialView) : base(initialView)
+        {
+        }
+
+        public override Task<APIGatewayProxyResponse> ConvertResponseAction(ModalResult result)
+        {
+            if (result.Submit != null)
+            {
+                return Task.FromResult(new APIGatewayProxyResponse()
+                {
+                    StatusCode = 200,
+                    Body = JsonConvert.SerializeObject(result),
+                    Headers = new Dictionary<string, string>
+                    {
+                        {"Content-Type","application/json"}
+                    }
+                });
+            }
+            
+            return Task.FromResult(new APIGatewayProxyResponse(){StatusCode = 200});
+        }
+    }
+```
+
+__Modals__
+
+Once you have your stack, then you can create a tree of Modal views that represent the stack you're trying to create.
+
+Modal classes handle scenarios such as
+
+* If a view lower down the tree is recognised then the view is correctly pushed onto the current stack.
+* If an action ID is one of those attached to the current view, the modal will re-generate the view and update itself
+* View submission is sent to the `Submit` method
+* Updates via block actions are sent to the 'Update' method
+
+You nest your modal sub-classes together to represent up to three levels of view stack Slack allows
+
+```csharp
+public EditItemStack() : base(
+            new EditItem( 
+                new EditItemAction(
+                    new ItemActionResult())))
+        {
+        }
+    }
+```
+
+

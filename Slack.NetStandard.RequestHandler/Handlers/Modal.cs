@@ -98,7 +98,7 @@ namespace Slack.NetStandard.RequestHandler.Handlers
 
         public abstract Task<View> GenerateView(object context = null);
 
-        protected virtual async Task<(ResponseAction Submit, WebApiResponse Update)> HandleFromParent(SlackContext context, IParentModal parent)
+        protected virtual async Task<ModalResult> HandleFromParent(SlackContext context, IParentModal parent)
         {
             if (!context.Items.ContainsKey(ModalHandlerId))
             {
@@ -108,20 +108,20 @@ namespace Slack.NetStandard.RequestHandler.Handlers
             if ((string) context.Items[ModalHandlerId] == "submit")
             {
                 var submit = await Submit((ViewSubmissionPayload) context.Interaction, context, parent);
-                return (submit, null);
+                return new ModalResult(submit, null);
             }
 
             var response = await Update((BlockActionsPayload)context.Interaction, context, parent);
-            return (null, response);
+            return new ModalResult(null, response);
         }
 
-        internal Task<(ResponseAction Submit, WebApiResponse Update)> ExecuteModal(SlackContext context, IParentModal parent)
+        internal Task<ModalResult> ExecuteModal(SlackContext context, IParentModal parent)
         {
             var modalList = ((List<string>)context.Items[nameof(ModalHandlerId)]);
             return Modals.First(m => context.Items.ContainsKey(m.ModalHandlerId) || modalList.Contains(m.ModalHandlerId)).HandleFromParent(context, parent);
         }
 
-        public virtual async Task<(ResponseAction Submit, WebApiResponse Update)> Handle(SlackContext context)
+        public virtual async Task<ModalResult> Handle(SlackContext context)
         {
             if (!context.Items.ContainsKey(ModalHandlerId))
             {
@@ -131,10 +131,10 @@ namespace Slack.NetStandard.RequestHandler.Handlers
             if ((string) context.Items[ModalHandlerId] == "submit")
             {
                 var submit = await Submit((ViewSubmissionPayload) context.Interaction, context);
-                return (submit, null);
+                return new ModalResult(submit, null);
             }
             var response = await Update((BlockActionsPayload)context.Interaction, context);
-            return (null, response);
+            return new ModalResult(null, response);
         }
     }
 }
