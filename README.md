@@ -88,20 +88,14 @@ public class GatewayResponseStack : ModalStack<APIGatewayProxyResponse>
 
         public override Task<APIGatewayProxyResponse> ConvertResponseAction(ModalResult result)
         {
-            if (result.Submit != null)
+            APIGatewayProxyResponse response = result switch
             {
-                return Task.FromResult(new APIGatewayProxyResponse()
-                {
-                    StatusCode = 200,
-                    Body = JsonConvert.SerializeObject(result),
-                    Headers = new Dictionary<string, string>
-                    {
-                        {"Content-Type","application/json"}
-                    }
-                });
-            }
-            
-            return Task.FromResult(new APIGatewayProxyResponse(){StatusCode = 200});
+                { Submit: not null } => //Submission result handled here,
+                { Update: not null } => //Update result (open, push, update) handled here,
+                _ => //Default response is a positive "all clear"
+            };
+
+            return Task.FromResult(response);
         }
     }
 ```
