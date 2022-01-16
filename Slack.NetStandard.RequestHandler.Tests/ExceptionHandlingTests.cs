@@ -5,6 +5,7 @@ using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Slack.NetStandard.Endpoint;
 using Slack.NetStandard.RequestHandler.Handlers;
+using Slack.NetStandard.Socket;
 using Xunit;
 
 namespace Slack.NetStandard.RequestHandler.Tests
@@ -12,10 +13,17 @@ namespace Slack.NetStandard.RequestHandler.Tests
     public class ExceptionHandlingTests
     {
         [Fact]
+        public async Task ArgumentNullExceptionIfNoEnvelope()
+        {
+            var request = new SlackPipeline<object>();
+            await Assert.ThrowsAsync<ArgumentNullException>(() => request.Process((Envelope)null));
+        }
+
+        [Fact]
         public async Task ArgumentNullExceptionIfNoRequest()
         {
             var request = new SlackPipeline<object>();
-            await Assert.ThrowsAsync<ArgumentNullException>(() => request.Process(null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => request.Process((SlackInformation)null));
         }
 
         [Fact]

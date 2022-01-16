@@ -32,9 +32,9 @@ namespace Slack.NetStandard.RequestHandler.Handlers
 
         public virtual Task<TResponse> Handle(SlackContext context)
         {
-            return HandleCommand(context.Command, context.Tag);
+            return HandleCommand(context.Command, context);
         }
 
-        protected abstract Task<TResponse> HandleCommand(SlashCommand command, object tag = null);
+        protected abstract Task<TResponse> HandleCommand(SlashCommand command, SlackContext context);
     }
 }

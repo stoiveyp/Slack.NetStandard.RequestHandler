@@ -25,9 +25,9 @@ namespace Slack.NetStandard.RequestHandler.Handlers
 
         public virtual Task<TResponse> Handle(SlackContext context)
         {
-            return HandlePayload((TPayloadType) context.Interaction, context.Tag);
+            return HandlePayload((TPayloadType) context.Interaction, context);
         }
 
-        protected abstract Task<TResponse> HandlePayload(TPayloadType payload, object tag = null);
+        protected abstract Task<TResponse> HandlePayload(TPayloadType payload, SlackContext context);
     }
 }

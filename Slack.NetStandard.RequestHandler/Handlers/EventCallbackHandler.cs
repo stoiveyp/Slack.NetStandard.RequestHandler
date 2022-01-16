@@ -28,9 +28,9 @@ namespace Slack.NetStandard.RequestHandler.Handlers
         {
             var callback = (EventCallback)context.Event;
             var evt = (TEventType)callback.Event;
-            return HandleEvent(callback, evt, context.Tag);
+            return HandleEvent(callback, evt, context);
         }
 
-        protected abstract Task<TResponse> HandleEvent(EventCallback callback, TEventType evt, object tag = null);
+        protected abstract Task<TResponse> HandleEvent(EventCallback callback, TEventType evt, SlackContext context);
     }
 }

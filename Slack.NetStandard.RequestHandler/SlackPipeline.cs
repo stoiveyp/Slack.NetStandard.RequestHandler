@@ -45,6 +45,21 @@ namespace Slack.NetStandard.RequestHandler
             ErrorInterceptors = errorInterceptors == null ? new () : new LinkedList<ISlackErrorInterceptor<TResponse>>(errorInterceptors);
         }
 
+        public Task<TResponse> Process(Socket.Envelope envelope, object tag = null)
+        {
+            if (envelope == null)
+            {
+                throw new ArgumentNullException(nameof(envelope), "Envelope is required");
+            }
+
+            var context = new SlackContext(envelope.ToSlackInformation())
+            {
+                Tag = tag
+            };
+            context.Items.Add("envelope",envelope);
+            return Process(context);
+        }
+
         public Task<TResponse> Process(SlackInformation information, object tag = null)
         {
             if (information == null)
