@@ -16,7 +16,7 @@ namespace Slack.NetStandard.RequestHandler.Handlers
         public ISlackRequestHandler<T>[] Handlers { get; }
         public readonly string GroupHandlerId = Guid.NewGuid().ToString("N");
 
-        public bool CanHandle(SlackContext context)
+        public virtual bool CanHandle(SlackContext context)
         {
             if (!GroupCheck(context)) return false;
 
@@ -30,7 +30,7 @@ namespace Slack.NetStandard.RequestHandler.Handlers
             return false;
         }
 
-        public Task<T> Handle(SlackContext context) => context.Items.ContainsKey(GroupHandlerId) 
+        public virtual Task<T> Handle(SlackContext context) => context.Items.ContainsKey(GroupHandlerId) 
             ? ((ISlackRequestHandler<T>)context.Items[GroupHandlerId]).Handle(context) 
             : Task.FromResult(default(T));
         
