@@ -61,6 +61,21 @@ return await pipeline.Process(slashContext);
 
 Side note - another advantage of having handlers perform logic is that your executing environment doesn't need to know about the logic its executing, functionality can be tweaked and reordered by the order of the handlers without any alterations to the project that handles the actual Slack requests.
 
+# Grouping Common Conditions
+
+If you start having a large number of handlers, you can group common expressions to try and skip groups of handlers if you know they'll all return false.
+
+You can do this with a GroupedRequestHandler
+
+```csharp
+var pipeline = new SlackPipeline<object>(
+            new GroupedRequestHandler<object>(
+                context => context.Command != null,
+                new SlashCommandWithText(),
+                new SlashCommandWithoutText())
+);
+```
+
 # Pre-packaged handlers
 Although you can create handlers for yourself if you wish, there are several types of handler already available as base classes.
 
